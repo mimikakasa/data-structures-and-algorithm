@@ -1,0 +1,25 @@
+#include<iostream>
+using namespace std;
+
+int printDigit(int n)
+{
+	if (n>=0&&n<10)
+	{
+		return n % 10;
+	}
+}
+
+void printOut(int n)
+{
+	if (n >= 10)
+		printOut(n / 10);
+	cout<<printDigit(n % 10);
+}
+
+int main()
+{
+	printOut(76234);
+
+	system("pause");
+	return 0;
+}
