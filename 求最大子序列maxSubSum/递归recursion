@@ -1,0 +1,61 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+int max1(int a, int b, int c)
+{
+  //求三个数的最大值用两次三目运算符即可
+	return (a >= b) ? (a >= c ? a : c) : (b >= c ? b : c);
+}
+
+int maxSumRec(const vector<int>& a, int left, int right)
+{
+	if (left==right)
+	{
+		if (a[left] > 0)
+		{
+			return a[left];
+		}
+		else return 0;
+	}
+
+	int center = (left + right) / 2;
+	int maxLeftSum = maxSumRec(a, left, center);
+	int maxRightSum = maxSumRec(a, center + 1, right);
+
+	int maxLeftBorderSum = 0,thisLeftBorderSum = 0;
+	for (int i = center; i>=left; --i)
+	{
+		
+		thisLeftBorderSum += a[i];
+
+		if (thisLeftBorderSum>maxLeftBorderSum)
+		{
+			maxLeftBorderSum = thisLeftBorderSum;
+		}
+	}
+
+	int maxRightBorderSum = 0, thisRightBorderSum = 0;
+	for (int i = center+1; i<=right; ++i)
+	{
+		thisRightBorderSum += a[i];
+
+		if (thisRightBorderSum > maxRightBorderSum)
+		{
+			maxRightBorderSum = thisRightBorderSum;
+		}
+	}
+
+	return max1(maxLeftSum, maxRightSum, maxLeftBorderSum + maxRightBorderSum);
+}
+
+
+int main()
+{
+	vector<int> x = {-2,11,-4,13,-5,-2};
+
+	cout << maxSumRec(x, 0, x.size() - 1);
+
+	system("pause");
+	return 0;
+}
