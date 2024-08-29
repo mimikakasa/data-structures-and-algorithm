@@ -1,0 +1,11 @@
+//m一般比n大，小了也无所谓，则第一次循环m n位置交换
+long long gcd(long long m, long long n)
+{
+	while (n!=0)
+	{
+		long long rem = m % n;
+		m = n;
+		n = rem;
+	}
+	return m;
+}
