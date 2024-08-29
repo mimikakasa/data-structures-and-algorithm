@@ -1,0 +1,34 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+int maxSubSum(const vector<int>& a)
+{
+	int maxSum = 0, thisSum = 0;
+
+	for (int i = 0; i < a.size(); i++)
+	{
+		thisSum += a[i];
+		
+		if (thisSum>maxSum)
+		{
+			maxSum = thisSum;
+		}
+		else if (thisSum<0)
+		{
+			thisSum = 0;
+		}
+	}
+
+	return maxSum;
+}
+
+int main()
+{
+	vector<int> x = {4,-3,5,-2,-1,2,6,-2};
+
+	cout << maxSubSum(x);
+
+	system("pause");
+	return 0;
+}
