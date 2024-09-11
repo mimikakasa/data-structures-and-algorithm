@@ -1,0 +1,35 @@
+#include<iostream>
+using namespace std;
+
+bool valueIsIndex(int a[], int low, int high)
+{
+	int mid = (low + high) / 2;
+
+	if (low > high)
+	{
+		return false;
+	}
+
+	if (a[mid] == mid)
+	{
+		return true;
+	}
+	else if (a[mid] < mid)
+	{
+		return valueIsIndex(a, mid + 1, high);
+	}
+	else
+	{
+		return valueIsIndex(a, low, mid - 1);
+	}
+}
+
+int main()
+{
+	int x[7] = { -3,-2,-1,2,5,6,7 };
+
+	cout << (valueIsIndex(x, 0, 6) ? "True" : "False") << endl;
+
+	system("pause");
+	return 0;
+}
