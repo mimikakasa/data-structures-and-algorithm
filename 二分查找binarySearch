@@ -22,3 +22,21 @@ int binarySearch(const vector<Comparable>& a, const Comparable b)
 	}
 	return NOT_FOUND;
 }
+
+
+int binarySearch(int array[], int n, int value)
+{
+	int l = -1;
+	int r = n;// l,r are beyond array bounds
+
+	while (l+1!=r)//stop when l,r meet
+	{
+		int i = (l + r) / 2;
+		if (value < array[i]) r = i;//Left half
+		if (value == array[i])return i;//Found value
+		if (value > array[i])l = i;//Right half
+
+	}
+	return n;//Search value not in array
+
+}
