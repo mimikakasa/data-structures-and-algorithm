@@ -1,0 +1,98 @@
+#include<iostream>
+using namespace std;
+
+class Node
+{
+public:
+	int data;
+	Node* next;
+
+	//Constructor to initialize node
+	Node(int data)
+	{
+		this->data = data;
+		this->next = nullptr;//Default to nullptr
+	}
+};
+
+class LinkedList
+{
+private:
+	Node* head;
+
+public:
+	//Constructor to initialize the linked list
+	LinkedList()
+	{
+		head =nullptr;
+	}
+
+	//Method to insert at the beginning
+	void insertAtBegin(int data)
+	{
+		Node* newNode = new Node(data);
+		newNode->next = head;
+		head = newNode;
+	}
+
+	//Method to insert at the end
+	void insertAtEnd(int data)
+	{
+		Node* newNode = new Node(data);
+		if (head==nullptr)
+		{
+			head = newNode;
+			return;
+		}
+		Node* temp = head;
+		while (temp->next!=nullptr)
+		{	
+			temp = temp->next;
+		}
+		temp->next = newNode;//newNode = temp->next; 会使得 newNode 指向 temp 节点的下一个节点，
+							 //而不是把 temp->next 设置为指向 newNode
+	}
+
+	//Method to print the list
+	void printList()
+	{
+		Node* temp = head;
+		cout << "[";
+		while (temp!=nullptr)
+		{
+			cout << " " << temp->data << " ";
+			temp = temp->next;
+		}
+		cout << "]";
+	}
+
+	//Destructor to free the allocated memory
+	~LinkedList()
+	{
+		Node* current = head;
+		while (current!=nullptr)
+		{
+			Node* nextNode = current->next;
+			delete current;
+			current = nextNode;
+		}
+	}
+};
+
+int main()
+{
+	LinkedList list;
+
+	list.insertAtBegin(1);
+	list.insertAtEnd(2);
+	list.insertAtEnd(4);
+	list.insertAtEnd(3);
+	list.insertAtEnd(5);
+	list.insertAtBegin(0);
+
+	cout << "Linked List:";
+	list.printList();
+
+	system("pause");
+	return 0;
+}
