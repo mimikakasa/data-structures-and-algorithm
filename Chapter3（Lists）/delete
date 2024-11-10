@@ -1,0 +1,167 @@
+#include<iostream>
+using namespace std;
+
+class Node
+{
+public:
+	int data;
+	Node* next;
+
+	//Constructor to initialize node
+	Node(int data)
+	{
+		this->data = data;
+		this->next = nullptr;//Default to nullptr
+	}
+};
+
+class LinkedList
+{
+private:
+	Node* head;
+
+public:
+	//Constructor to initialize the linked list
+	LinkedList()
+	{
+		head = nullptr;
+	}
+
+	//Method to insert at the beginning
+	void insertAtBegin(int data)
+	{
+		Node* newNode = new Node(data);
+		newNode->next = head;
+		head = newNode;
+	}
+
+	//Method to insert after a specific node
+	void insertAfterNode(Node* prevNode, int data)
+	{
+		if (prevNode==nullptr)
+		{
+			cout << "previous node cannot be nullptr" << endl;
+			return;
+		}
+
+		Node* newNode = new Node(data);
+		newNode->next = prevNode->next;
+		prevNode->next = newNode;
+	}
+
+	//Method to delete at begin
+	void deleteAtBegin()
+	{
+		head = head->next;
+	}
+
+	//Method to delete at end
+	void deleteAtEnd()
+	{
+		if (head==nullptr)
+		{
+			return;//if the list is empty.nothing to delete
+		}
+
+		if (head->next==nullptr)
+		{
+			//if there is only one node,delete it
+			delete head;
+			head = nullptr;
+			return;
+		}
+
+		Node* current = head;
+		while (current->next!=nullptr&&current->next->next!=nullptr)
+		{
+			current = current->next;
+		}
+		//now current points to the second-to-last node
+		delete current->next;
+		current->next = nullptr;
+	}
+
+	//Method to delete at specific node by its value(key)
+	void deleteNode(int key)
+	{
+		Node* current = head;
+		Node* prev = nullptr;
+
+		//if the head node itself holds the key
+		if (current!=nullptr&&current->data==key)
+		{
+			head = current->next;//Move head to the next node
+			delete current;		 //Delete the old head
+			return;
+		}
+
+		//find the key to be deleted
+		while (current!=nullptr&&current->data!=key)
+		{
+			prev = current;
+			current = current->next;
+		}
+
+		//if the key was not found in the list
+		if (current==nullptr)
+		{
+			return;
+		}
+
+		//unlink the node from the list
+		prev->next = current->next;
+		delete current;//Delete the node
+	}
+
+	//Method to get the head of the list
+	Node* getHead()
+	{
+		return head;
+	}
+
+	//Method to print the list
+	void printList()
+	{
+		Node* temp = head;
+		cout << "[";
+		while (temp != nullptr)
+		{
+			cout << " " << temp->data << " ";
+			temp = temp->next;
+		}
+		cout << "]";
+	}
+
+	//Destructor to free the allocated memory
+	~LinkedList()
+	{
+		Node* current = head;
+		while (current != nullptr)
+		{
+			Node* nextNode = current->next;
+			delete current;
+			current = nextNode;
+		}
+	}
+};
+
+int main()
+{
+	LinkedList list;
+
+	list.insertAtBegin(5);
+	list.insertAtBegin(4);
+	list.insertAtBegin(3);
+	list.insertAtBegin(2);
+
+	list.insertAfterNode(list.getHead()->next, 6);
+	list.insertAfterNode(list.getHead()->next->next, 7);
+
+	list.deleteNode(7);
+
+	cout << "Linked List:";
+	list.printList();
+
+	system("pause");
+	return 0;
+}
