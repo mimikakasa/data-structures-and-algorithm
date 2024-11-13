@@ -1,0 +1,309 @@
+#include <iostream>
+using namespace std;
+
+// Node class representing an individual node in the doubly linked list
+class Node {
+public:
+    int data;
+    int key;
+    Node* next;
+    Node* prev;
+
+    // Constructor to initialize a node with key and data
+    Node(int key, int data) : key(key), data(data), next(nullptr), prev(nullptr) {}
+};
+
+// DoublyLinkedList class to manage the list
+class DoublyLinkedList {
+private:
+    Node* head;
+    Node* last;
+
+public:
+    // Constructor to initialize the list with null head and last
+    DoublyLinkedList() : head(nullptr), last(nullptr) {}
+
+    // Check if the list is empty
+    bool isEmpty() const {
+        return head == nullptr;
+    }
+
+    // Insert a node at the beginning of the list
+    void insertFirst(int key, int data) {
+        Node* newNode = new Node(key, data);
+
+        if (isEmpty()) {
+            // If the list is empty, set both head and last to the new node
+            last = newNode;
+        }
+        else {
+            // Update the current head's previous pointer to the new node
+            head->prev = newNode;
+        }
+
+        // Point the new node's next to the current head
+        newNode->next = head;
+
+        // Make the new node the head
+        head = newNode;
+    }
+
+    //Insert a node at the last position
+    void insertLast(int key, int data)
+    {
+        Node* newNode = new Node(key, data);
+        if (isEmpty())
+        {
+            //if the list is empty,set both head and last to the new node
+            head = newNode;
+        }
+        else
+        {
+            //Update the current last node's next pointer to the new node
+            last->next = newNode;
+            //Update the new node's previous pointer to the current last node
+            newNode->prev = last;
+        }
+
+        //Make the new node the last node of the list
+        last = newNode;
+    }
+
+    //delete a node at the first position
+    void deleteFirst()
+    {
+        if (isEmpty())
+        {
+            cout << "The list is empty.Nothing to delete." << endl;
+            return;
+        }
+        Node* temp = head;
+        if (head==last)//only one node in the list
+        {
+            head = last = nullptr;
+        }
+        else
+        {
+            head = head->next;
+            head->prev = nullptr;
+        }
+        delete temp;
+        cout << "First node deleted." << endl;
+    }
+
+    //delete a node at the last position
+    void deleteLast()
+    {
+        if (isEmpty())
+        {
+            cout << "The list is empty.Nothing to delete." << endl;
+            return;
+        }
+        Node* temp = last;
+        if (head == last)//only one node in the list
+        {
+            head = last = nullptr;
+        }
+        else
+        {
+            last = last->prev;
+            last->next = nullptr;
+        }
+        delete temp;
+        cout << "Last node deleted." << endl;
+    }
+
+    //insert a node after a given node(by key)
+    void insertAfter(int key, int newKey, int newData)
+    {
+        Node* current = head;
+
+        //Search for the node with the given key
+        while (current!=nullptr&&current->key!=key)
+        {
+            current = current->next;
+        }
+        if (current==nullptr)
+        {
+            cout << "Node with key " << key << " not found" << endl;
+            return;
+        }
+
+        //Create a new node and insert it after the current node
+        Node* newNode = new Node(newKey, newData);
+        newNode->next = current->next;
+        newNode->prev = current;
+
+        //If the current node is not the last node,update the next node's previous pointer
+        if (current->next!=nullptr)
+        {
+            current->next->prev = newNode;
+        }
+
+        //Update the current node's next pointer to the new node
+        current->next = newNode;
+
+        //If the current node is the last node,update the last pointer
+        if (current==last)
+        {
+            last = newNode;
+        }
+
+        cout << "Node inserted after node with key" << key << endl;
+    }
+
+    //delete a given node
+    void deleteNode(int key)
+    {
+        // 如果链表为空，直接返回
+        if (isEmpty()) {
+            cout << "The list is empty. Nothing to delete." << endl;
+            return;
+        }
+
+        Node* current = head;
+
+        //查找要删除的节点
+        while (current!=nullptr&&current->key!=key)
+        {
+            current = current->next;
+        }
+
+        //如果没有找到指定节点
+        if (current==nullptr)
+        {
+            cout << "Node with key " << key << " not found" << endl;
+            return;
+        }
+
+        //如果要删除的是头节点
+        if (current==head)
+        {
+            head = current->next;
+            if (head!=nullptr)
+            {
+                head->prev = nullptr;//如果新的头节点存在，更新它的prev指针
+            }
+        }
+
+        //如果要删除的是尾节点
+        else if (current==last)
+        {
+            last = current->prev;
+            if (last!=nullptr)
+            {
+                last->next = nullptr;//如果新的尾节点存在，更新它的next指针
+            }
+        }
+        //删除的是中间节点
+        else
+        {
+            current->prev->next = current->next;
+            current->next->prev = current->prev;
+        }
+
+        //释放该节点的内存
+        delete current;
+        cout << "Node with key " << key << " deleted" << endl;
+    }
+
+    //delete a node after a given node(by key)
+    void deleteAfter(int key)//搞错了看看就好
+    {
+        Node* current = head;
+        while (current!=nullptr&&current->key!=key)
+        {
+            current = current->next;
+        }
+        if (current==nullptr)
+        {
+            cout << "Node with key " << key << " not found" << endl;
+            return;
+        }
+
+        //Get the node to be deleted(the node after the current node)
+        Node* temp = current->next;
+        current->next = temp->next;//这一步跳过了中间节点（该被删除的节点），使链表直接连接到下一个节点
+
+        //if the node to be deleted is not the last node,update the next node's previous pointer
+        if (temp->next!=nullptr)
+        {
+            temp->next->prev = current;
+        }
+
+        //if the node to be deleted is the last node
+        if (temp==last)
+        {
+            last = current;
+        }
+
+        delete temp;
+        cout << "Node after node with key " << key << " deleted" << endl;
+    }
+
+    //print the list from head to last
+    void printListForward() const
+    {
+        Node* current = head;
+        while (current!=nullptr)
+        {
+            cout << "(" << current->key << "," << current->data << ")";
+            current = current->next;
+        }
+        cout << endl;
+    }
+
+    //print the list from last to head
+    void printListBackward()const
+    {
+        Node* current = last;
+        while (current!=nullptr)
+        {
+            cout << "(" << current->key << "," << current->data << ")";
+            current = current->prev;
+        }
+        cout << endl;
+    }
+
+    //Destructor to free allocated memory
+    ~DoublyLinkedList()
+    {
+        Node* current = head;
+        while (current!=nullptr)
+        {
+            Node* temp = current;
+            current = current->next;
+            delete temp;
+        }
+    }
+
+};
+
+int main() 
+{
+    DoublyLinkedList list;
+
+    list.insertFirst(1, 10);
+    list.insertFirst(2, 20);
+    list.insertFirst(3, 30);
+    list.insertFirst(4, 40);
+
+    list.insertLast(5, 1);
+    list.insertLast(6, 2);
+    list.insertLast(7, 3);
+    list.insertLast(8, 4);
+
+    list.insertAfter(5, 9, 90);
+    list.deleteNode(3);
+
+    list.deleteFirst();
+    list.deleteLast();
+
+    cout << "Doubly Linked List(forward): ";
+    list.printListForward(); 
+    cout << "Doubly linked list(backward):";
+    list.printListBackward();
+
+
+    return 0;
+}
