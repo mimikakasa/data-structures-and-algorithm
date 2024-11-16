@@ -1,0 +1,123 @@
+#include<iostream>
+using namespace std;
+
+#define MAX 6 //队列最大容量
+
+class CircularQueue
+{
+private:
+	int intArray[MAX];//存储队列元素的数组
+	int front;		  //队列头部索引
+	int rear;		  //队列尾部索引
+	int itemCount;	  //队列中的元素个数
+
+public:
+	CircularQueue()
+	{
+		front = 0;
+		rear = -1;	   
+		itemCount = 0; 
+	}
+
+	//查看队列头元素
+	int peek()
+	{
+		if (isEmpty())
+		{
+			cout << "Queue is empty,no front element" << endl;
+			return - 1;//表示队列为空
+		}
+	}
+
+	//判断队列是否为空
+	bool isEmpty()
+	{
+		return itemCount == 0;
+	}
+
+	bool isFull()
+	{
+		return itemCount == MAX;
+	}
+
+	int getSize()
+	{
+		return itemCount;
+	}
+
+	void insert(int data)
+	{
+		if (!isFull())
+		{
+			if (rear == MAX - 1)
+			{
+				rear = -1;//如果尾部到达最大容量 则循环回到队列开头
+			}
+			intArray[++rear] = data;//将新元素插入队列
+			itemCount++;
+		}
+		else
+			cout << "queue is full,can't insert" << data << endl;
+	}
+
+	int removeData()
+	{
+		if (isEmpty())
+		{
+			cout << "queue is empty,can't remove element" << endl;
+			return -1;
+		}
+		int data = intArray[front++];
+		if (front==MAX)
+		{
+			front = 0;//如果队列头部到达最大容量 则循环回到队列开头
+		}
+		itemCount--;
+		return data;
+	}
+
+	void printqueue()
+	{
+		if (isEmpty())
+		{
+			cout << "queue is empty" << endl;
+			return;
+		}
+		cout << "queue:";
+		for (int i = 0; i < MAX; i++)
+		{
+			cout << intArray[i] << " ";
+		}
+		cout << endl;
+	}
+
+};
+
+int main()
+{
+	CircularQueue queue;
+
+	queue.insert(3);
+	queue.insert(5);
+	queue.insert(9);
+	queue.insert(1);
+	queue.insert(12);
+	queue.insert(15);
+
+	cout << "queue size:" << queue.getSize() << endl;
+	queue.printqueue();
+
+	if (queue.isFull())
+	{
+		cout << "queue is full" << endl;
+	}
+
+	//删除一个元素
+	int num = queue.removeData();
+	cout << "Element removed: " << num << endl;
+
+	cout << "Queue size after deletion: " << queue.getSize() << endl;
+	cout << "Element at front: " << queue.peek() << endl;
+
+	return 0;
+}
