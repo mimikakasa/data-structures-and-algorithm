@@ -1,0 +1,235 @@
+#include<iostream>
+#include<exception>
+
+using namespace std;
+
+//Binary search tree node structure
+struct BinaryNode
+{
+	int element;
+	BinaryNode* left;
+	BinaryNode* right;
+
+	BinaryNode(int theElement, BinaryNode* lt, BinaryNode* rt) 
+		:element(theElement), left(lt), right(rt){}
+};
+
+//Binary search tree class
+class BinarySearchTree
+{
+public:
+	BinarySearchTree();
+	~BinarySearchTree();
+
+	int findMin()const;
+	int findMax()const;
+	bool find(int x)const;
+	void insert(int x);
+	void remove(int x);
+
+	void printInorder()const;
+
+private:
+	BinaryNode* root;
+
+	//Helper function for recursion
+	void insert(int x, BinaryNode*& t);
+	BinaryNode* findMin(BinaryNode* t)const;
+	BinaryNode* findMax(BinaryNode* t)const;
+	bool find(int x, BinaryNode* t)const;
+	void remove(int x, BinaryNode*& t);
+	
+	//Helper function for emptying the tree
+	void makeEmpty(BinaryNode*& t);
+
+	void inorderTraversal(BinaryNode* t)const;
+};
+
+//Constructor to initialize the root as nullptr
+BinarySearchTree::BinarySearchTree():root(nullptr){}
+
+BinarySearchTree::~BinarySearchTree()
+{
+	makeEmpty(root);
+}
+
+int BinarySearchTree::findMin()const
+{
+	//If the tree is empty,throw an exception
+	if (root==nullptr)
+	{
+		throw runtime_error("the tree is empty.");
+	}
+	return findMin(root)->element;
+}
+
+BinaryNode* BinarySearchTree::findMin(BinaryNode* t)const
+{
+	//如果当前节点t为空，说明已经遍历到了最底层的空节点 不该出现的情况 抛出异常
+	if (t==nullptr)
+	{
+		throw runtime_error("invalid node pointer while finding minimum");
+	}
+	while (t->left!=nullptr)//递归查找左子树 直到左子节点为空 即最小值所在节点
+	{
+		t = t->left;
+	}
+	return t;
+}
+
+int BinarySearchTree::findMax()const
+{
+	if (root==nullptr)
+	{
+		throw runtime_error("the tree is empty.");
+	}
+	return findMax(root)->element;
+}
+
+BinaryNode* BinarySearchTree::findMax(BinaryNode* t)const
+{
+	if (t==nullptr)
+	{
+		throw runtime_error("invalid node pointer while finding maximum");
+	}
+	while (t->right!=nullptr)
+	{
+		t = t->right;
+	}
+	return t;
+}
+
+//Check if a value exists in the tree
+bool BinarySearchTree::find(int x)const
+{
+	return find(x, root);
+}
+
+bool BinarySearchTree::find(int x, BinaryNode* t)const
+{
+	if (t == nullptr)
+	{
+		return false;
+	}
+	else if (x < t->element)
+	{
+		return find(x, t->left);
+	}
+	else if (x > t->element)
+	{
+		return find(x, t->right);
+	}
+	else
+		return true;
+}
+
+void BinarySearchTree::insert(int x)
+{
+	insert(x, root);
+}
+
+void BinarySearchTree::insert(int x, BinaryNode*& t)
+{
+	//if the current node is nullptr,create a new node and insert
+	if (t==nullptr)
+	{
+		t = new BinaryNode(x, nullptr, nullptr);
+	}
+	else if (x<t->element)
+	{
+		insert(x, t->left);
+	}
+	else if (x>t->element)
+	{
+		insert(x, t->right);
+	}
+}
+
+void BinarySearchTree::remove(int x)
+{
+	remove(x, root);
+}
+
+void BinarySearchTree::remove(int x, BinaryNode*& t)
+{
+	if (t==nullptr) //空树 直接返回
+	{
+		return;
+	}
+	if (x<t->element)
+	{
+		remove(x, t->left);
+	}
+	else if (x>t->element)
+	{
+		remove(x, t->right);
+	}
+	else if (t->left!=nullptr&&t->right!=nullptr) //上面两个if判断都没过说明x==t->element了，下面就是找到了的操作
+	{
+		BinaryNode* minNode = findMin(t->right);
+		t->element = minNode->element;
+		remove(t->element, t->right);
+	}
+	else
+	{
+		BinaryNode* oldNode = t;
+		t = (t->left != nullptr) ? t->left : t->right;
+		delete oldNode;
+	}
+}
+
+//Helper function for emptying the tree
+void BinarySearchTree::makeEmpty(BinaryNode*& t)
+{
+	if (t!=nullptr)
+	{
+		makeEmpty(t->left);
+		makeEmpty(t->right);
+		delete t;
+		t = nullptr;
+	}
+}
+
+void BinarySearchTree::printInorder()const
+{
+	inorderTraversal(root);
+	cout << endl;
+}
+
+void BinarySearchTree::inorderTraversal(BinaryNode* t)const
+{
+	if (t!=nullptr)
+	{
+		inorderTraversal(t->left);
+		cout << t->element << " ";
+		inorderTraversal(t->right);
+	}
+}
+
+int main()
+{
+	BinarySearchTree bst;
+
+	// 插入一些节点
+	bst.insert(5);
+	bst.insert(3);
+	bst.insert(7);
+	bst.insert(2);
+	bst.insert(4);
+	bst.insert(6);
+	bst.insert(8);
+
+	cout << "二叉搜索树中序遍历结果（插入节点后）:";
+	bst.printInorder();
+
+	cout << "最小值:" << bst.findMin() << endl;
+	cout << "最大值:" << bst.findMax() << endl;
+
+	cout << "查找值为4的节点，结果:" << (bst.find(4) ? "exist" : "not exist") << endl;
+
+	bst.remove(5);
+	cout << "删除值为5的节点后 bst中序遍历结果:";
+	bst.printInorder();
+
+	return 0;
+}
