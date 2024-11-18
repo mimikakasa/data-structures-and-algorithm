@@ -1,0 +1,264 @@
+#include<iostream>
+#include<algorithm>
+
+using namespace std;
+
+class AVLTree
+{
+private:
+	struct AvlNode
+	{
+		int key;
+		int height;
+		AvlNode* left;
+		AvlNode* right;
+
+		AvlNode(int k):key(k),height(1),left(nullptr),right(nullptr){}
+	};
+
+	AvlNode* root;
+
+	int height(AvlNode* node)
+	{
+		if (node==nullptr)
+		{
+			return 0;
+		}
+		return node->height;
+	}
+
+	void updateHeight(AvlNode* node)
+	{
+		if (node==nullptr)
+		{
+			return;
+		}
+		node->height = max(height(node->left), height(node->right)) + 1;
+	}
+
+	//Left rotation
+	void rotateWithLeftChild(AvlNode*& k2)
+	{
+		AvlNode* k1 = k2->left;
+		k2->left = k1->right;//set k2's left subtree to k1's right subtree
+		k1->right = k2;//ser k1's right subtree to k2
+
+		updateHeight(k2);
+		updateHeight(k1);
+		k2 = k1;//update k2 to k1,which becomes the new root
+	}
+
+	//Right rotation
+	void rotateWithRightChild(AvlNode*& k1)
+	{
+		if (k1 == nullptr) return;
+		AvlNode* k2 = k1->right;
+		if (k2 == nullptr) return;
+		k1->right = k2->left;
+		k2->left = k1;
+
+		updateHeight(k1);
+		updateHeight(k2);
+		k1 = k2;
+	}
+
+	//Double rotation with left child
+	void doubleWithLeftChild(AvlNode*& k3)
+	{
+		//First perform right rotation on k3's left subtree
+		rotateWithRightChild(k3->left);
+		//Then perform left rotation on k3
+		rotateWithLeftChild(k3);
+	}
+
+	//Double rotation with right child
+	void doubleWithRightChild(AvlNode*& k1)
+	{
+		//First perform left rotation on k1's right subtree
+		rotateWithLeftChild(k1->right);
+		//Then perform right rotation on k1
+		rotateWithRightChild(k1);
+	}
+
+	//Private helper funtion for inserting a node
+	void insert(AvlNode*& root, int key)
+	{
+		if (root==nullptr)
+		{
+			root = new AvlNode(key);
+			return;
+		}
+		if (key<root->key)
+		{
+			insert(root->left, key);
+		}
+		else
+		{
+			insert(root->right, key);
+		}
+		//Update the height of the current node
+		updateHeight(root);
+		int balance = height(root->left) - height(root->right);
+		//if the left subtree's height is more than one greater than the right subtree's height
+		if (balance>1)//左子树高了
+		{
+			if (key<root->left->key)//如果插入的节点在不平衡节点的左儿子的左子树上，左单旋转
+			{
+				rotateWithLeftChild(root);
+			}
+			else                    //插入的节点在不平衡节点的左儿子的右子树上，左右双旋转
+			{
+				doubleWithLeftChild(root);
+			}
+		}
+		else if (balance<-1)
+		{
+			if (key>root->right->key)
+			{
+				rotateWithRightChild(root);
+			}
+			else
+			{
+				doubleWithLeftChild(root);
+			}
+		}
+	}
+
+	//Private helper function for removing a node
+	void remove(AvlNode*& root, int key)
+	{
+		if (root==nullptr)
+		{
+			return;
+		}
+		if (key<root->key)
+		{
+			remove(root->left, key);
+		}
+		else if (key>root->key)
+		{
+			remove(root->right, key);
+		}
+		else
+		{
+			if (root->left==nullptr||root->right==nullptr)//如果当前节点只有一个子节点或者没有子节点
+			{
+				AvlNode* temp = root->left ? root->left : root->right;//创建一个临时指针指向非空的子节点（如果有）
+				if (temp==nullptr)//如果没有子节点，说明要删除的是叶子节点
+				{
+					temp = root;
+					root = nullptr;//将临时指针指向当前节点，然后当前节点置为空，表示删除当前节点
+				}
+				else//如果有一个子节点
+				{
+					*root = *temp;//将当前节点的值替换为子节点的值，相当于把当前节点变为子节点
+				}
+				delete temp;//释放了子节点的内存，因为当前节点的值已经替换为子节点的值，可理解为删除了原来的子节点
+			}
+			else                                         //如果当前节点有两个子节点
+			{
+				AvlNode* minRight = root->right;
+				while (minRight->left!=nullptr)
+				{
+					minRight = minRight->left;			 
+				}
+				//Find the minimun node in the right subtree and replace the current node's key with it
+				root->key = minRight->key;
+				//Remove the minimun node from the right subtree recursively
+				remove(root->right, minRight->key);
+			}
+		}
+		if (root==nullptr) //再次检查当前节点是否为空
+		{
+			return;
+		}
+		updateHeight(root);
+		int balance = height(root->left) - height(root->right);
+		if (balance>1)//左子树高了
+		{
+			if (root != nullptr && root->left != nullptr)
+			{
+				if (height(root->left->left) >= height(root->left->right))//如果左儿子的左子树更高，左单旋转
+				{
+					rotateWithLeftChild(root);
+				}
+				else													  //左儿子的右子树更高 左右双旋转
+				{
+					doubleWithLeftChild(root);
+				}
+			}
+		}
+		else if (balance<-1)
+		{
+			if (root != nullptr && root->left != nullptr)
+			{
+				if (height(root->right->right) >= height(root->right->left))
+				{
+					rotateWithRightChild(root);
+				}
+				else
+				{
+					doubleWithRightChild(root);
+				}
+			}
+		}
+	}
+
+	//Private helper function for inorder traversal and printing
+	void inorderTraversal(AvlNode* root)
+	{
+		if (root==nullptr)
+		{
+			return;
+		}
+		inorderTraversal(root->left);
+		cout << root->key << " ";
+		inorderTraversal(root->right);
+	}
+
+public:
+	AVLTree():root(nullptr){}
+
+	~AVLTree()
+	{
+		//Implement memory deallocation here if needed
+	}
+
+	//Public interface for usage
+	void insertNode(int key)
+	{
+		insert(root, key);
+	}
+
+	void removeNode(int key)
+	{
+		remove(root, key);
+	}
+
+	void printInorder()
+	{
+		inorderTraversal(root);
+		cout << endl;
+	}
+};
+
+int main() 
+{
+	AVLTree avlTree;
+	avlTree.insertNode(10);
+	avlTree.insertNode(20);
+	avlTree.insertNode(30);
+	avlTree.insertNode(40);
+	avlTree.insertNode(50);
+	avlTree.insertNode(25);
+
+	cout << "Inorder traversal after insertions: ";
+	avlTree.printInorder();
+
+	avlTree.removeNode(30);
+
+	cout << "Inorder traversal after deletion: ";
+	avlTree.printInorder();
+
+	return 0;
+}
