@@ -1,0 +1,18 @@
+template<typename Comparable>
+struct ChildSibNode
+{
+	Comparable element;
+	ChildSibNode<Comparable>* child;
+	ChildSibNode<Comparable>* sib;
+};
+
+template<typename Comparable>
+void depth1st(ChildSibNode<Comparable>* t)
+{
+	if (t!=nullptr)
+	{
+		cout << t->element << endl;
+		depth1st(t->child);
+		depth1st(t->sib);
+	}
+}
