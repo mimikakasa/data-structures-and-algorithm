@@ -1,0 +1,229 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+// 假设UnderflowException是一个自定义异常类，这里简单定义一个空类
+class UnderflowException {};
+
+// 二叉堆类模板，Comparable为模板参数，表示堆中元素类型，需支持比较操作
+template<typename Comparable>
+class BinaryHeap {
+public:
+    // 构造函数，可指定容量，默认容量为100
+    explicit BinaryHeap(int capacity = 100);
+    // 从给定元素集合构建堆的构造函数
+    BinaryHeap(const vector<Comparable>& items);
+
+    // 判断堆是否为空
+    bool isEmpty() const;
+    // 返回堆中的最小元素（不删除）
+    const Comparable& findMin() const;
+
+    // 向堆中插入元素（左值引用版本）
+    void insert(const Comparable& x);
+    // 向堆中插入元素（右值引用版本）
+    void insert(Comparable&& x);
+    // 删除堆中的最小元素
+    void deleteMin();
+    // 删除堆中的最小元素，并将其存储到minitem中
+    void deleteMin(Comparable& minitem);
+    // 打印堆
+    void printHeap()const;
+    // 清空堆
+    void makeEmpty();
+
+private:
+    int currentSize;
+    vector<Comparable>array;
+
+    //从无序树构建堆序性质的函数
+    void buildHeap();
+    //在堆中进行下滤操作的内部函数，hole为下滤开始处的下标
+    void percolateDown(int hole);
+};
+
+//默认构造函数
+template<typename Comparable>
+BinaryHeap<Comparable>::BinaryHeap(int capacity):currentSize(0),array(capacity+1){}
+
+//判断堆是否为空
+template<typename Comparable>
+bool BinaryHeap<Comparable>::isEmpty()const
+{
+    return currentSize == 0;
+}
+
+//返回堆中的最小元素（不删除）
+template<typename Comparable>
+const Comparable& BinaryHeap<Comparable>::findMin()const
+{
+    if (isEmpty())
+        throw UnderflowException();
+    return array[1];
+}
+
+//插入元素到堆中的函数实现
+template<typename Comparable>
+void BinaryHeap<Comparable>::insert(const Comparable& x)
+{
+    //如果堆数组已满 将数组容量翻倍
+    if (currentSize==array.size()-1)
+    {
+        array.resize(array.size() * 2);
+    }
+
+    //新元素上滤的起始位置为下一个可用位置（先自增currentSize）
+    int hole = ++currentSize;
+    Comparable copy = x;
+
+    //将x的拷贝放到数组位置0 方便后续循环终止条件判断
+    array[0] = move(copy);
+    //只要新元素x小于当前空穴节点元素 就将父节点元素下移到空穴位置 空穴上移
+    for (; hole>1&&x < array[hole / 2]; hole /= 2)
+    {
+        array[hole] = move(array[hole / 2]);
+    }
+    //将新元素放入到最终确定的空穴位置
+    array[hole] = move(array[0]);
+}
+
+//删除最小元的函数实现（无返回值版本）
+template<typename Comparable>
+void BinaryHeap<Comparable>::deleteMin()
+{
+    //如果堆为空 抛出异常
+    if (isEmpty())
+    {
+        throw UnderflowException();
+    }
+
+    //将堆中最后一个元素移到根节点位置
+    array[1] = move(array[currentSize--]);
+    //从根节点开始下滤调整堆序
+    percolateDown(1);
+}
+
+//删除最小元并返回其值的函数实现
+template<typename Comparable>
+void BinaryHeap<Comparable>::deleteMin(Comparable& minitem)
+{
+    //如果堆为空 抛出异常
+    if (isEmpty())
+        throw UnderflowException();
+
+    //将根节点元素（即将被删除的最小元）赋值给minitem
+    minitem = move(array[1]);
+    //将堆中最后一个元素移到根节点位置
+    array[1] = move(array[currentSize--]);
+    //从根节点开始下滤调整堆序
+    percolateDown(1);
+}
+
+//在堆中进行下滤操作的函数实现
+template<typename Comparable>
+void BinaryHeap<Comparable>::percolateDown(int hole)
+{
+    int child=0;
+    //设定一个拷贝存储当前要下滤的元素（因下滤过程中hole值变化）
+    Comparable temp = move(array[hole]);
+    
+    //循环条件：当前节点有子节点
+    for (;hole*2<=currentSize;hole=child)
+    {
+        //找到左子节点 
+        child = hole * 2;
+
+        //确定当前空穴的较小子节点（如果存在右子节点且右子节点更小）
+        if (child < currentSize && array[child + 1] < array[child])
+            ++child;
+        //如果较小子节点小于空穴元素 将较小子节点元素上移到空穴位置 空穴下移 
+        if (array[child] < temp)
+            array[hole] = move(array[child]);
+        else
+        {
+            //否则将空穴元素放入最终位置
+            array[hole] = move(temp);
+            break;
+        }
+    }
+}
+
+//从给定元素集合构建堆的构造函数实现
+template<typename Comparable>
+BinaryHeap<Comparable>::BinaryHeap(const vector<Comparable>& items) 
+    :array(items.size() + 10), currentSize(items.size())
+{
+    //将元素依次放入数组（从位置1开始 位置0有特殊用途
+    for (int i = 0; i < items.size(); ++i)
+    {
+        array[i + 1] = items[i];
+    }
+    //构建堆序性质
+    buildHeap();
+}
+
+//构建堆序性质的函数实现
+template<typename Comparable>
+void BinaryHeap<Comparable>::buildHeap()
+{
+    //从最后一个非叶节点开始 到根节点结束 对每个节点进行下滤操作
+    for (int i = currentSize/2 ; i >0; --i)
+    {
+        percolateDown(i);
+    }
+}
+
+//清空堆
+template<typename Comparable>
+void BinaryHeap<Comparable>::makeEmpty()
+{
+    currentSize == 0;
+    array.clear();//或者array.resize(0);
+}
+
+//打印堆
+template<typename Comparable>
+void BinaryHeap<Comparable>::printHeap()const
+{
+    if (currentSize == 0)
+        throw UnderflowException();
+    for (int i = 1; i <=currentSize; i++)
+    {
+        cout << array[i]<<"  ";
+    }
+}
+
+int main()
+{
+    int N;
+    cout << "请输入元素个数N:";
+    cin >> N;
+
+    //逐个插入元素到堆中
+    vector<int> elements;
+    BinaryHeap<int>heap1;
+    cout << "请输入" << N << " 个整数（逐个插入到堆中）:" << endl;
+    for (int i = 0; i < N; i++)
+    {
+        int element;
+        cin >> element;
+        elements.push_back(element);
+        heap1.insert(element);
+    }
+    heap1.printHeap();
+
+    //以线性时间建立堆
+    BinaryHeap<int>heap2;
+    cout << "请输入" << N << "个整数（以线性时间构建堆）：" << endl;
+    for (int i = 0; i < N; i++)
+    {
+        int element;
+        cin >> element;
+        elements.push_back(element);
+    }
+    heap2 = BinaryHeap<int>(elements);
+    cout << "线性时间构建堆后堆中的元素（最小值在根节点）：";
+    heap2.printHeap();
+
+    return 0;
+}
