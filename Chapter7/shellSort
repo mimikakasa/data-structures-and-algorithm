@@ -1,0 +1,45 @@
+#include<vector>	
+using namespace std;
+
+//插入排序
+template<typename Comparable>
+void insertionSort(vector<Comparable>& a)
+{
+	for (int p = 1; p <a.size() ; p++)
+	{
+		Comparable temp = move(a[p]);
+		int j = p;
+
+		for (; j>0&&temp<a[j-1]; --j)
+		{
+			a[j] = move(a[j - 1]);
+		}
+		a[j] = move(temp);
+	}
+}
+
+//希尔排序
+template<typename Comparable>
+void shellSort(vector<Comparable>& a)
+{
+	//外层循环 用于控制增量gap的递减
+	for (int gap=a.size()/2;gap>0;gap/=2)
+	{
+		//中层循环 用于遍历数组元素 对增量相同的每一个序列进行遍历
+		for (int p=gap;p<a.size();p++)
+		{
+			//将a[i]暂存到temp中
+			Comparable temp = move(a[p]);
+			int j = p;
+
+			//内层循环 用于对每个子序列进行插入排序
+			for (;j>=gap&&temp<a[j-gap];j-=gap) //j=gap时就是增量序列第二个元素了 第一个不用插排
+			{
+				//将较大的元素后移
+				a[j] = move(a[j - gap]);
+			}
+			//将暂存的元素插入正确的位置
+			a[j] = move(temp);
+		}
+	}	
+}
