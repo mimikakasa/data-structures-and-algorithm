@@ -1,0 +1,73 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+
+//堆排序的内部方法 i是堆中一项的下标 返回左儿子的下标
+inline int leftChild(int i)
+{
+    return 2 * i + 1;
+}
+
+//在deleteMax和buildHeap中用到的堆排序的内部方法 i是开始下滤的位置 n是二叉堆的逻辑大小
+template<typename Comparable>
+void percDown(vector<Comparable>& a, int i, int n)
+{
+    // 用于存储子节点的下标
+    int child;
+    // 用于临时存储元素
+    Comparable temp;
+
+    // 开始下滤操作
+    // 将a[i]移动到temp中，作为初始的待下滤元素
+    for (temp = move(a[i]); leftChild(i) < n; i = child)
+    {
+        // 获取当前节点的左子节点下标
+        child = leftChild(i);
+        // 如果右子节点存在（child!= n - 1）且右子节点比左子节点大
+        if (child != n - 1 && a[child] < a[child + 1])
+            // 则选择右子节点
+            child++;
+        // 如果待下滤元素小于子节点
+        if (a[child] > temp)
+            // 将较大的子节点上移到当前节点位置
+            a[i] = move(a[child]);
+        else
+            // 否则，待下滤元素已经在合适位置，退出循环
+            break;
+    }
+    // 将待下滤元素放到合适的最终位置
+    a[i] = move(temp);
+}
+
+//堆排序
+template<typename Comparable>
+void heapSort(vector<Comparable>& a)
+{
+	//构建最大堆  从最后一个非叶子节点开始（父节点索引是(i-1)/2向下取整)
+	for (int i = a.size()/2-1; i >= 0; --i)
+	{
+		percDown(a, i, a.size());
+	}
+
+	//进行堆排序
+	for (int j = a.size()-1; j >0; --j)
+	{
+		//将堆顶元素（最大值）与最后一个未排序的元素交换
+		swap(a[0], a[j]);
+		//调整堆 使其保持最大堆性质
+		percDown(a, 0, j);
+	}
+}
+
+int main()
+{
+    vector<int> V = { 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+    heapSort(V);
+    
+    // 输出排序后的数组
+    for (const auto& elem : V) {
+        cout << elem << " ";
+    }
+    cout << endl;
+}
